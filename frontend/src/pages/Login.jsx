@@ -13,16 +13,11 @@ function Login() {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        console.log("Login button clicked");
-        console.log("Email:", email);
-
         try {
             const response = await api.post("/auth/login", {
                 email: email,
                 password: password,
             });
-
-            console.log("Login response:", response.data);
 
             localStorage.setItem("token", response.data.token);
 
@@ -33,8 +28,6 @@ function Login() {
 
             navigate("/");
         } catch (error) {
-            console.log("Login error:", error);
-
             setError(
                 error.response?.data?.message ||
                 "Login failed"
@@ -83,8 +76,7 @@ function Login() {
                 )}
 
                 <button
-                    type="button"
-                    onClick={handleSubmit}
+                    type="submit"
                     className="w-full bg-red-600 text-white p-3 rounded"
                 >
                     Login

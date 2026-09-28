@@ -1,4 +1,4 @@
-const Movie = require("../models/movie");
+const Movie = require("../models/Movie");
 
 const createMovie = async (req, res) => {
     try {
@@ -52,7 +52,21 @@ const createMovie = async (req, res) => {
 
 const getMovies = async (req, res) => {
     try {
-        const movies = await Movie.find({ status: "active" });
+        const { search, genre } = req.query;
+
+        const filter = { status: "active" };
+
+        // Search by title
+        if (search) {
+            filter.title = { $regex: search, $options: "i" };
+        }
+
+        // Filter by genre
+        if (genre) {
+            filter.genre = genre;
+        }
+
+        const movies = await Movie.find(filter).sort({ releaseDate: -1 });
 
         res.status(200).json({
             message: "Movies fetched successfully",

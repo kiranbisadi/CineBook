@@ -9,22 +9,25 @@ const {
 } = require("../controllers/screenController");
 
 const protect = require("../middleware/authMiddleware");
+const ownerOnly = require("../middleware/ownerMiddleware");
 
 const router = express.Router();
 
+// All screen routes are for theatre owners only
+
 // Create screen
-router.post("/", protect, createScreen);
+router.post("/", protect, ownerOnly, createScreen);
 
 // Get all screens belonging to owner's theatres
-router.get("/my-screens", protect, getMyScreens);
+router.get("/my-screens", protect, ownerOnly, getMyScreens);
 
 // Get one screen
-router.get("/:id", protect, getScreenById);
+router.get("/:id", protect, ownerOnly, getScreenById);
 
 // Update screen
-router.put("/:id", protect, updateScreen);
+router.put("/:id", protect, ownerOnly, updateScreen);
 
 // Delete screen
-router.delete("/:id", protect, deleteScreen);
+router.delete("/:id", protect, ownerOnly, deleteScreen);
 
 module.exports = router;

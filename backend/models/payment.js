@@ -23,8 +23,16 @@ const paymentSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["UPI", "CARD", "CASH"],
+      enum: ["UPI", "CARD", "CASH", "RAZORPAY"],
       required: true,
+    },
+
+    razorpayOrderId: {
+      type: String,
+    },
+
+    razorpayPaymentId: {
+      type: String,
     },
 
     status: {

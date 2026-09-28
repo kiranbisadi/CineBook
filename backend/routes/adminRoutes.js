@@ -9,6 +9,9 @@ const {
   blockUser,
   unblockUser,
   deleteUser,
+  getTheatres,
+  approveTheatre,
+  rejectTheatre,
 } = require("../controllers/adminController");
 
 const protect = require("../middleware/authMiddleware");
@@ -55,44 +58,18 @@ router.put(
 // USER MANAGEMENT
 // ==========================================
 
-// Get all users
-router.get(
-  "/users",
-  protect,
-  adminOnly,
-  getAllUsers
-);
+router.get("/users", protect, adminOnly, getAllUsers);
+router.put("/users/:id", protect, adminOnly, updateUser);
+router.put("/users/:id/block", protect, adminOnly, blockUser);
+router.put("/users/:id/unblock", protect, adminOnly, unblockUser);
+router.delete("/users/:id", protect, adminOnly, deleteUser);
 
-// Update user
-router.put(
-  "/users/:id",
-  protect,
-  adminOnly,
-  updateUser
-);
+// ==========================================
+// THEATRE MANAGEMENT
+// ==========================================
 
-// Block user
-router.put(
-  "/users/:id/block",
-  protect,
-  adminOnly,
-  blockUser
-);
-
-// Unblock user
-router.put(
-  "/users/:id/unblock",
-  protect,
-  adminOnly,
-  unblockUser
-);
-
-// Delete user
-router.delete(
-  "/users/:id",
-  protect,
-  adminOnly,
-  deleteUser
-);
+router.get("/theatres", protect, adminOnly, getTheatres);
+router.put("/theatres/:id/approve", protect, adminOnly, approveTheatre);
+router.put("/theatres/:id/reject", protect, adminOnly, rejectTheatre);
 
 module.exports = router;

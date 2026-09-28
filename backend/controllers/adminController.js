@@ -1,9 +1,9 @@
 const TheatreOwner = require("../models/theatreOwner.js");
-const User = require("../models/user.js");
+const User = require("../models/User.js");
+const Theatre = require("../models/Theatre");
 
-// ==========================================
 // GET ALL USERS
-// ==========================================
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -22,9 +22,8 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// ==========================================
 // UPDATE USER
-// ==========================================
+
 const updateUser = async (req, res) => {
   try {
     const { name, phone, role, status } = req.body;
@@ -93,9 +92,8 @@ const updateUser = async (req, res) => {
   }
 };
 
-// ==========================================
 // BLOCK USER
-// ==========================================
+
 const blockUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -142,9 +140,8 @@ const blockUser = async (req, res) => {
   }
 };
 
-// ==========================================
 // UNBLOCK USER
-// ==========================================
+
 const unblockUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -184,9 +181,8 @@ const unblockUser = async (req, res) => {
   }
 };
 
-// ==========================================
 // DELETE USER
-// ==========================================
+
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -225,23 +221,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllUsers,
-  updateUser,
-  blockUser,
-  unblockUser,
-  deleteUser,
-
-  // Existing theatre-owner admin functions
-  getPendingTheatreOwners,
-  approveTheatreOwner,
-  rejectTheatreOwner,
-};
-
-
-// ==========================================
 // THEATRE OWNER FUNCTIONS
-// ==========================================
 
 // Get pending theatre owners
 async function getPendingTheatreOwners(req, res) {
@@ -331,3 +311,116 @@ async function rejectTheatreOwner(req, res) {
     });
   }
 }
+
+// THEATRE FUNCTIONS
+
+// Get theatres by status (default: pending)
+// Example: GET /api/admin/theatres?status=approved
+async function getTheatres(req, res) {
+  try {
+    const status = req.query.status || "pending";
+
+    const theatres = await Theatre.find({ status }).populate(
+      "ownerId",
+      "name email phone"
+    );
+
+    res.status(200).json({
+      message: "Theatres fetched successfully",
+      theatres,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
+// Approve a theatre
+async function approveTheatre(req, res) {
+  try {
+    const theatre = await Theatre.findById(req.params.id);
+
+    if (!theatre) {
+      return res.status(404).json({
+        message: "Theatre not found",
+      });
+    }
+
+    if (theatre.status === "approved") {
+      return res.status(400).json({
+        message: "Theatre is already approved",
+      });
+    }
+
+    theatre.status = "approved";
+    theatre.rejectionReason = "";
+
+    await theatre.save();
+
+    res.status(200).json({
+      message: "Theatre approved successfully",
+      theatre,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
+// Reject a theatre (reason is required)
+async function rejectTheatre(req, res) {
+  try {
+    const { rejectionReason } = req.body;
+
+    if (!rejectionReason) {
+      return res.status(400).json({
+        message: "Rejection reason is required",
+      });
+    }
+
+    const theatre = await Theatre.findById(req.params.id);
+
+    if (!theatre) {
+      return res.status(404).json({
+        message: "Theatre not found",
+      });
+    }
+
+    theatre.status = "rejected";
+    theatre.rejectionReason = rejectionReason;
+
+    await theatre.save();
+
+    res.status(200).json({
+      message: "Theatre rejected successfully",
+      theatre,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
+module.exports = {
+  getAllUsers,
+  updateUser,
+  blockUser,
+  unblockUser,
+  deleteUser,
+
+  // Theatre-owner admin functions
+  getPendingTheatreOwners,
+  approveTheatreOwner,
+  rejectTheatreOwner,
+
+  // Theatre admin functions
+  getTheatres,
+  approveTheatre,
+  rejectTheatre,
+};

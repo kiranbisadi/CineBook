@@ -1,4 +1,4 @@
-const Screen = require("../models/screen");
+const Screen = require("../models/Screen");
 const Theatre = require("../models/Theatre");
 
 // ==========================================

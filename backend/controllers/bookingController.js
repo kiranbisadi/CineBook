@@ -1,6 +1,26 @@
 const Booking = require("../models/booking");
 const Show = require("../models/Show");
-const Screen = require("../models/screen");
+const Screen = require("../models/Screen");
+const Theatre = require("../models/Theatre");
+
+// HELPER: CHECK THE SHOW'S THEATRE IS STILL BOOKABLE
+// (approved by admin, and its owner has not been blocked)
+const isTheatreBookable = async (theatreId) => {
+  const theatre = await Theatre.findById(theatreId).populate(
+    "ownerId",
+    "status"
+  );
+
+  if (!theatre || theatre.status !== "approved") {
+    return false;
+  }
+
+  if (!theatre.ownerId || theatre.ownerId.status === "blocked") {
+    return false;
+  }
+
+  return true;
+};
 
 // HELPER: GENERATE SEAT NUMBERS
 
@@ -66,6 +86,17 @@ const createBooking = async (req, res) => {
     if (!show) {
       return res.status(404).json({
         message: "Show not found or inactive",
+      });
+    }
+
+    // CHECK THE THEATRE IS STILL APPROVED AND ITS OWNER IS NOT BLOCKED
+
+    const bookable = await isTheatreBookable(show.theatreId);
+
+    if (!bookable) {
+      return res.status(400).json({
+        message:
+          "This show is currently unavailable for booking",
       });
     }
 

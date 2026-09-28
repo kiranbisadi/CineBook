@@ -1,7 +1,7 @@
 const Show = require("../models/Show");
-const Movie = require("../models/movie");
+const Movie = require("../models/Movie");
 const Theatre = require("../models/Theatre");
-const Screen = require("../models/screen");
+const Screen = require("../models/Screen");
 
 // ==========================================
 // HELPER: CONVERT HH:MM TO MINUTES
@@ -632,10 +632,14 @@ const getPublicShows = async (req, res) => {
         "movieId",
         "title poster duration language"
       )
-      .populate(
-        "theatreId",
-        "name address city"
-      )
+      .populate({
+        path: "theatreId",
+        select: "name address city status ownerId",
+        populate: {
+          path: "ownerId",
+          select: "status",
+        },
+      })
       .populate(
         "screenId",
         "name totalSeats rows seatsPerRow"
@@ -645,10 +649,20 @@ const getPublicShows = async (req, res) => {
         startTime: 1,
       });
 
+    // Only show customers shows whose theatre is approved
+    // and whose owner has not been blocked by admin
+    const visibleShows = shows.filter(
+      (show) =>
+        show.theatreId &&
+        show.theatreId.status === "approved" &&
+        show.theatreId.ownerId &&
+        show.theatreId.ownerId.status !== "blocked"
+    );
+
     res.status(200).json({
       message:
         "Available shows fetched successfully",
-      shows,
+      shows: visibleShows,
     });
   } catch (error) {
     res.status(500).json({

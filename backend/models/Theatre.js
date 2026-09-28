@@ -22,7 +22,7 @@ const theatreSchema = new mongoose.Schema(
 
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TheatreOwner",
+      ref: "User",
       required: true,
     },
 

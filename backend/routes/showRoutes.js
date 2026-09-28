@@ -10,25 +10,26 @@ const {
 } = require("../controllers/showController");
 
 const protect = require("../middleware/authMiddleware");
+const ownerOnly = require("../middleware/ownerMiddleware");
 
 const router = express.Router();
 
-// Public - users can view available shows
+// Public - anyone can view available shows
 router.get("/public", getPublicShows);
 
-// Theatre owner - create show
-router.post("/", protect, createShow);
+// Theatre owner only - create show
+router.post("/", protect, ownerOnly, createShow);
 
-// Theatre owner - get own shows
-router.get("/my-shows", protect, getMyShows);
+// Theatre owner only - get own shows
+router.get("/my-shows", protect, ownerOnly, getMyShows);
 
-// Theatre owner - get one show
-router.get("/:id", protect, getShowById);
+// Theatre owner only - get one show
+router.get("/:id", protect, ownerOnly, getShowById);
 
-// Theatre owner - update show
-router.put("/:id", protect, updateShow);
+// Theatre owner only - update show
+router.put("/:id", protect, ownerOnly, updateShow);
 
-// Theatre owner - delete show
-router.delete("/:id", protect, deleteShow);
+// Theatre owner only - delete show
+router.delete("/:id", protect, ownerOnly, deleteShow);
 
 module.exports = router;
